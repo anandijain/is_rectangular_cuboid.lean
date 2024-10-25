@@ -37,6 +37,8 @@ variable {V : Type*} {P : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V
   [NormedAddTorsor V P] [hd2 : Fact (finrank ℝ V = 2)] [Module.Oriented ℝ V (Fin 2)]
 
 variable (a b : P)
+def s : Set P := {a, b}
+#check s
 -- theorem collinear_pair (p₁ p₂ : P) : Collinear k ({p₁, p₂} : Set P) := by
 theorem ab_collinear (a b : P) : Collinear ℝ ({a, b} : Set P) := collinear_pair ℝ a b
 
@@ -45,10 +47,18 @@ theorem ab_collinear (a b : P) : Collinear ℝ ({a, b} : Set P) := collinear_pai
 -- #check (AffineMap.lineMap a b)
 
 theorem midpoint_collinear (a b : P) : Collinear ℝ ({a, b, midpoint ℝ a b} : Set P) := by
-  have h : (Collinear ℝ ({a, b} : Set P)) := (collinear_pair ℝ a b)
-  have h' : (Collinear ℝ ({a, midpoint ℝ a b} : Set P)) := (collinear_pair ℝ a (midpoint ℝ a b))
-  have h'' : (Collinear ℝ ({b, midpoint ℝ a b} : Set P)) := (collinear_pair ℝ b (midpoint ℝ a b))
-
-  unfold midpoint
-  rw [← oangle_eq_zero_or_eq_pi_iff_collinear,EuclideanGeometry.oangle]
-  
+  have m :=  midpoint ℝ a b
+  rw [collinear_iff_exists_forall_eq_smul_vadd]
+  use a, b -ᵥ a
+  intro p hp
+  rw [Set.mem_insert_iff, Set.mem_insert_iff, Set.mem_singleton_iff] at hp
+  cases' hp with hp hp
+  · use 0
+    simp [hp]
+  cases' hp with hp hp
+  . use 1
+    simp [hp]
+  . use (1/2 : ℝ)
+    simp [hp]
+    rw [midpoint, AffineMap.lineMap]
+    simp

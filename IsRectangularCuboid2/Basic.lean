@@ -64,7 +64,7 @@ theorem midpoint_collinear (a b : P) : Collinear ℝ ({a, b, midpoint ℝ a b} :
     rw [midpoint, AffineMap.lineMap]
     simp
 end my_sec
-
+section foo
 theorem irr2 : Irrational 2 := by
   unfold Irrational
 
@@ -108,9 +108,136 @@ theorem divs (n m: ℕ) (hp: ¬IsSquare n) (hpp: n ∣ (m^2)) : n ∣ m := by
 theorem ex1_2_2 (r : ℚ): ¬ ∃r, 2 ^ r = 3 := by
   unfold Rat
   sorry
+end foo
 
-def perfect_powers : Set ℕ := { n | ∃ m k : ℕ, m ≥ 2 ∧ k ≥ 2 ∧ n = m ^ k }
-def non_perfect_powers : Set ℕ := { n | n ≥ 2 ∧ n ∉ perfect_powers }
+
+
+
+
+
+
+
+
+section ex1_2_4
+
+-- https://leanprover.zulipchat.com/#narrow/channel/270676-lean4/topic/Covering.20.5CN.20with.20powers.20of.20non-perfect.20powers
+
+/--
+Prop stating that a numer is a perfect power.
+-/
+def IsPerfectPower (m : ℕ) := ∃ n k, 1 < k ∧ n ^ k = m
+
+theorem one_is_perf_pow : IsPerfectPower 1 := by
+  unfold IsPerfectPower
+  use 1, 2
+  simp
+
+-- #eval 0 ∈ ℕ
+#check Nat
+#check Nat.zero
+#check Nat.zero.succ
+#check Nat.succ Nat.zero
+
+theorem zero_is_perf_pow : IsPerfectPower 0 := by
+  unfold IsPerfectPower
+  use 0, 2
+  simp
+
+
+def Perfect : Set ℕ := {n : ℕ | IsPerfectPower n}
+def nonPerfect : Set ℕ := {n : ℕ | ¬IsPerfectPower n}
+#check Perfect
+#check Perfect ∪ nonPerfect
+
+variable (a : Bool)
+#check a ∨ ¬a
+
+theorem a_or_not_a (a : Bool) : a ∨ ¬a := by
+  simp
+
+theorem n_is_perfect_or_not (n : ℕ) : (IsPerfectPower n ∨ ¬IsPerfectPower n) := by
+  apply Classical.em
+
+theorem covers_n : Perfect ∪ nonPerfect = ℕ := by
+  unfold Perfect nonPerfect
+
+  sorry
+
+
+#check ∀ a : ℤ, ∃! b : ℤ, a + 1 = b
+
+theorem simple_uniqueness_proof : ∀ a : ℤ, ∃! b : ℤ, a + 1 = b := by
+  intros a
+  use a+1
+  apply And.intro
+  . rfl
+  . intros y hy
+    rw [hy]
+
+
+theorem simpler : ∃! a:ℤ, 1+a=2 := by
+  use 1
+  apply And.intro
+  . rfl
+  . intro y
+    intro hy
+    linarith
+
+#check (1,2)
+
+/--
+Every number greater than one can be uniquely represented as a power of a number which isn't a perfect power.
+-/
+lemma utility_lemma (m : ℕ) (hm : 1 < m) : ∃! n : ℕ × ℕ, ¬IsPerfectPower n.1 ∧ n.1 ^ n.2 = m := by
+  -- want to say, m is either perfect or non perfect
+  -- how do i use n_is_perfect_or_not
+  -- have hp : (IsPerfectPower m ∨ ¬IsPerfectPower m) := by apply Classical.em
+  have hp : (IsPerfectPower m ∨ ¬IsPerfectPower m) := n_is_perfect_or_not m
+  cases hp with
+  | inl a => sorry
+  | inr b =>
+    use (m, 1)
+    apply And.intro
+    . simp
+      exact b
+    . intros y hy
+
+  -- if m ¬perfect, then we can take n.1 = m and n.2=1
+
+
+def setSeq : ℕ → Set ℕ
+| 0 => nonPerfect ∪ {0, 1}
+| i + 1 => (· ^ (i + 2)) '' nonPerfect
+
+theorem infinite (i : ℕ) : (setSeq i).Infinite := by
+  sorry
+
+theorem covers_ℕ : ⋃ n, setSeq n = Set.univ := by
+  sorry
+
+theorem pairwise_disjoint : Set.univ.PairwiseDisjoint setSeq := by
+  sorry
+
+end ex1_2_4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /-
 Find an infinite set of infinite Sets that are all pairwise disjoint, but the union of all is equal to N.

@@ -184,6 +184,49 @@ theorem simpler : ∃! a:ℤ, 1+a=2 := by
     linarith
 
 #check (1,2)
+-- #eval 0^0
+
+lemma mylemma : ∀a:ℕ, a^0=1 := by
+  intro a
+  rw [pow_zero]
+
+lemma mylemma2 : ∀a:ℕ, a^1=a := by
+  intro a
+  rw [pow_one]
+
+lemma not_perfect_power_implies_k_le_one (m a k : ℕ)
+  (h : ¬IsPerfectPower m) (hpow : a ^ k = m) : k = 0 ∨ k = 1 := by
+  by_cases hk : k > 1
+  · -- Case 1: k > 1
+    exfalso
+    apply h
+    use a, k
+
+  · -- Case 2: k ≤ 1
+    cases k
+    · left; rfl -- k = 0
+    · right; linarith -- k = 1
+
+/-
+if m is not a perfect power, then the only solution for a^b=m must be a=m b=1.
+the reason is, we are guaranteed by `h` that ¬∃ n,k : N, k>1 ∧ n^k=m
+this means the only options to find solutions for a and b limits b to be 0 or 1.
+in the zero case, there is no way to make a^0=m for m>1.
+since there is no solution for k=0 and we know that m^1=m ∀m
+-/
+lemma not_perfect_power_unique_solution (m a b : ℕ)
+  (h : ¬IsPerfectPower m) (hm: m > 1) (hab : a ^ b = m) : a = m ∧ b = 1 := by
+  apply not_perfect_power_implies_k_le_one m a b at h
+  have hb : b = 0 ∨ b = 1 := h hab
+  -- want to try b=0 and show that m>1 and a^0 are incompatible
+  cases' hb with hb0 hb1
+    exfalso
+    rw [hb0, pow_zero] at hab
+    linarith
+  .
+    rw [hb1, pow_one] at hab
+    exact ⟨hab, hb1⟩
+
 
 /--
 Every number greater than one can be uniquely represented as a power of a number which isn't a perfect power.
@@ -201,9 +244,22 @@ lemma utility_lemma (m : ℕ) (hm : 1 < m) : ∃! n : ℕ × ℕ, ¬IsPerfectPow
     . simp
       exact b
     . intros y hy
+      -- unfold IsPerfectPower at hy
+      obtain ⟨hya, hyb⟩ := hy
+      /-
+      that m is not a perfect power means theres no solution a^b for b > 1.
 
-  -- if m ¬perfect, then we can take n.1 = m and n.2=1
-
+      that doesn't mean there exists a solution for b=1, except there must always be m^1
+      since we know m>1 then there can't be a solution for any a st b=0 gives a^b=m,.
+      so the only solution must be (m,1 ).
+      -/
+      apply not_perfect_power_unique_solution m y.1 y.2 at hyb
+      cases' hyb with hyb1 hyb2
+      ext
+      rw [hyb1]
+      rw [hyb2]
+      exact b
+      apply hm
 
 def setSeq : ℕ → Set ℕ
 | 0 => nonPerfect ∪ {0, 1}

@@ -158,12 +158,22 @@ theorem a_or_not_a (a : Bool) : a ∨ ¬a := by
 theorem n_is_perfect_or_not (n : ℕ) : (IsPerfectPower n ∨ ¬IsPerfectPower n) := by
   apply Classical.em
 
-theorem covers_n : Perfect ∪ nonPerfect = ℕ := by
+/-
+Thanks to Floris van Doorn for this proof
+-/
+theorem covers_n : Perfect ∪ nonPerfect = Set.univ := by
   unfold Perfect nonPerfect
+  ext n
+  simp
+  exact n_is_perfect_or_not n
 
-  sorry
+theorem perf_disojoint_nonperf : Perfect ∩ nonPerfect = ∅ := by
+  unfold Perfect nonPerfect
+  ext n
+  simp
 
 
+#eval true ∨ true
 #check ∀ a : ℤ, ∃! b : ℤ, a + 1 = b
 
 theorem simple_uniqueness_proof : ∀ a : ℤ, ∃! b : ℤ, a + 1 = b := by
@@ -228,16 +238,36 @@ lemma not_perfect_power_unique_solution (m a b : ℕ)
     exact ⟨hab, hb1⟩
 
 
+lemma a_perfect_b_not_implies_notequal (a b : ℕ) (ha : IsPerfectPower a) (hb : ¬IsPerfectPower b) : a ≠ b := by
+  by_contra h_eq
+  rw [h_eq] at ha
+  exact hb ha
+
 /--
 Every number greater than one can be uniquely represented as a power of a number which isn't a perfect power.
 -/
 lemma utility_lemma (m : ℕ) (hm : 1 < m) : ∃! n : ℕ × ℕ, ¬IsPerfectPower n.1 ∧ n.1 ^ n.2 = m := by
-  -- want to say, m is either perfect or non perfect
-  -- how do i use n_is_perfect_or_not
-  -- have hp : (IsPerfectPower m ∨ ¬IsPerfectPower m) := by apply Classical.em
   have hp : (IsPerfectPower m ∨ ¬IsPerfectPower m) := n_is_perfect_or_not m
   cases hp with
-  | inl a => sorry
+  | inl a =>
+    have ha := a
+    obtain ⟨na, ka, hk1, hk2⟩ := a
+    -- rw [← hk2]
+    use (na, ka)
+    apply And.intro
+    . simp
+      apply And.intro
+      -- wait what if m=16 (so IsPerfPow) and n=4 (also IsPerf) here, then n is perfect power and 4^2 =  16
+      --  i dont think i can prove that n must not be perfect
+      -- the way forward is to choose (na,ka) such that na is the smallest possible. then it follows that its not a perfect power
+      -- 
+      rw [IsPerfectPower]
+      --
+      -- .
+    . simp
+
+
+
   | inr b =>
     use (m, 1)
     apply And.intro

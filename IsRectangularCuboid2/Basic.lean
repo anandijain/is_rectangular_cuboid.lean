@@ -217,6 +217,15 @@ lemma not_perfect_power_implies_k_le_one (m a k : ℕ)
     · left; rfl -- k = 0
     · right; linarith -- k = 1
 
+
+def pow_sols (m : ℕ) : Set (ℕ × ℕ) :=
+  {p | p.1 ^ p.2 = m ∧ p.2 > 1}
+
+lemma exists_minimal_pow_sols (m : ℕ) (hm : IsPerfectPower m) :
+    ∃ n k, (n, k) ∈ pow_sols m ∧ ∀ n' k', (n', k') ∈ pow_sols m → n ≤ n' := by
+  sorry
+
+
 /-
 if m is not a perfect power, then the only solution for a^b=m must be a=m b=1.
 the reason is, we are guaranteed by `h` that ¬∃ n,k : N, k>1 ∧ n^k=m
@@ -260,7 +269,7 @@ lemma utility_lemma (m : ℕ) (hm : 1 < m) : ∃! n : ℕ × ℕ, ¬IsPerfectPow
       -- wait what if m=16 (so IsPerfPow) and n=4 (also IsPerf) here, then n is perfect power and 4^2 =  16
       --  i dont think i can prove that n must not be perfect
       -- the way forward is to choose (na,ka) such that na is the smallest possible. then it follows that its not a perfect power
-      -- 
+      --
       rw [IsPerfectPower]
       --
       -- .
